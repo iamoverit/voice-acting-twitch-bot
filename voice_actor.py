@@ -62,7 +62,7 @@ available_languages = list(models.tts_models.keys())
 #     print(f'Available speakers for {lang}: {speakers}')
 
 def voice_act(text):
-
+    text = text[:140]
     language = 'ru'
     # speaker = 'ruslan_16khz'
     speaker = random.choice([s for s in list(models.tts_models.get(language).keys()) if re.compile('^.*_16khz$').match(s)])
@@ -89,7 +89,7 @@ def voice_act(text):
 
     # with open('output.wav', 'wb') as fp:
     #     fp.write(_make_wav(audio[0], rate = sample_rate).read())
-    wav=[]
+    wav = []
     for audio in audios:
         wav.append(_make_wav(audio, rate = sample_rate))
     return wav[-1:] + wav[:-1]
