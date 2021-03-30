@@ -62,6 +62,7 @@ available_languages = list(models.tts_models.keys())
 #     print(f'Available speakers for {lang}: {speakers}')
 
 def voice_act(text):
+
     language = 'ru'
     # speaker = 'ruslan_16khz'
     speaker = random.choice([s for s in list(models.tts_models.get(language).keys()) if re.compile('^.*_16khz$').match(s)])
@@ -78,7 +79,7 @@ def voice_act(text):
 
     # torchaudio.set_audio_backend('sox_io')
     model = model.to(device)  # gpu or cpu
-    audio = apply_tts(texts=[text],
+    audio = apply_tts(texts=re.split('\.\!\?\;\/', text),
                     model=model,
                     sample_rate=sample_rate,
                     symbols=symbols,
