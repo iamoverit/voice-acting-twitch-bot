@@ -79,7 +79,9 @@ def voice_act(text):
 
     # torchaudio.set_audio_backend('sox_io')
     model = model.to(device)  # gpu or cpu
-    audio = apply_tts(texts=re.split('\.\!\?\;\/', text),
+    texts = re.findall('.*?[\.\?\!]\s?', text)
+    print(texts)
+    audios = apply_tts(texts=texts,
                     model=model,
                     sample_rate=sample_rate,
                     symbols=symbols,
@@ -87,8 +89,14 @@ def voice_act(text):
 
     # with open('output.wav', 'wb') as fp:
     #     fp.write(_make_wav(audio[0], rate = sample_rate).read())
-    
-    return _make_wav(audio[0], rate = sample_rate)
+    wav=[]
+    for audio in audios:
+        wav.append(_make_wav(audio, rate = sample_rate))
+    return wav[-1:] + wav[:-1]
 
-# with open('output.wav', 'wb') as fp:
-#     fp.write(_make_wav(audio[0], rate = sample_rate))
+if __name__=='__main__':
+    i = 0
+    for wav in voice_act('Жили-были три китайца - Як, Як-Цидрак, Як-Цидрак-Цидрон-Цидрони, И еще три китаянки - Цыпа, Цыпа-Дрипа, Цыпа-Дрипа-Лампомпони. Поженились Як на Цыпе, Як-Цидрак на Цыпе-Дрипе, Як-Цидрак-Цидрон-Цидрони на Цыпе-Дрипе-Лампомпони. Вот у них родились дети: у Яка с Цыпой — Шах, у Як-Цидрака с Цыпой-Дрыпой — Шах-Шарах, у Як-Цидрак-Цидрони с Цыпо-Дрыпой-Лампопони — Шах-Шарах-Шарони.'):
+        i += 1
+        with open(f'output{i}.wav', 'wb') as fp:
+            fp.write(wav)
