@@ -80,7 +80,7 @@ def voice_act(text):
     # torchaudio.set_audio_backend('sox_io')
     model = model.to(device)  # gpu or cpu
     texts = re.findall('.*?[\.\?\!]\s?', text)
-    print(texts)
+    # print(texts)
     audios = apply_tts(texts=texts,
                     model=model,
                     sample_rate=sample_rate,
