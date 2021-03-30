@@ -79,9 +79,9 @@ def voice_act(text):
 
     # torchaudio.set_audio_backend('sox_io')
     model = model.to(device)  # gpu or cpu
-    texts = re.findall('.*?[\.\?\!]\s?', text)
+    # texts = re.findall('.*?[\.\?\!]\s?', text)
     # print(texts)
-    audios = apply_tts(texts=texts,
+    audios = apply_tts(texts=[text],
                     model=model,
                     sample_rate=sample_rate,
                     symbols=symbols,
@@ -89,10 +89,11 @@ def voice_act(text):
 
     # with open('output.wav', 'wb') as fp:
     #     fp.write(_make_wav(audio[0], rate = sample_rate).read())
-    wav = []
-    for audio in audios:
-        wav.append(_make_wav(audio, rate = sample_rate))
-    return wav[-1:] + wav[:-1]
+    # wav = []
+    # for audio in audios:
+    #     wav.append(_make_wav(audio, rate = sample_rate))
+    # return wav[-1:] + wav[:-1]
+    return _make_wav(audios[0], rate = sample_rate)
 
 if __name__=='__main__':
     i = 0
