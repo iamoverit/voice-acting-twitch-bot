@@ -183,8 +183,7 @@ class Twitch(commands.Cog):
                     filename = uuid.uuid4().hex
                     voice_act(message.content, filename)
                     source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'{filename}.wav'))
-                    voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-                    os.remove(f'{filename}.wav')
+                    voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else os.remove(f'{filename}.wav'))
 
     # TwitchIO command
     # async def twitch_command(self, ctx):
