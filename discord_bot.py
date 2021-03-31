@@ -16,6 +16,7 @@ from voice_actor import voice_act
 from omegaconf import OmegaConf
 
 import uuid
+import os
 
 ffmpeg_options = {
     'options': '-vn'
@@ -183,6 +184,7 @@ class Twitch(commands.Cog):
                     voice_act(message.content, filename)
                     source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'{filename}.wav'))
                     voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+                    os.remove(f'{filename}.wav')
 
     # TwitchIO command
     # async def twitch_command(self, ctx):
