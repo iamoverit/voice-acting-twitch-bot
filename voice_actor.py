@@ -61,7 +61,7 @@ available_languages = list(models.tts_models.keys())
 #     speakers = list(models.tts_models.get(lang).keys())
 #     print(f'Available speakers for {lang}: {speakers}')
 
-def voice_act(text):
+def voice_act(text, filename='output'):
     # text = text[:140]
     # print(text)
     language = 'ru'
@@ -95,7 +95,7 @@ def voice_act(text):
     # return wav[-1:] + wav[:-1]
     # return _make_wav(audio[0], rate = sample_rate)
     for i, _audio in enumerate(audio):
-        torchaudio.save(f'test_{str(i).zfill(2)}.wav',
+        torchaudio.save(f'{filename}.wav',
                         _audio.unsqueeze(0),
                         sample_rate=16000,
                         bits_per_sample=16)
