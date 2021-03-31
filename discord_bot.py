@@ -176,8 +176,10 @@ class Twitch(commands.Cog):
         if(message.author.tags.get('msg-id')=='highlighted-message'):
             for voice_client in self._voice_clients:
                 if self._voice_clients[voice_client] == message.channel.name:
-                    audio = FFmpegPCMAudioBytesIO(voice_act(message.content))
-                    source = discord.PCMVolumeTransformer(audio)
+                    # audio = FFmpegPCMAudioBytesIO(voice_act(message.content))
+                    # source = discord.PCMVolumeTransformer(audio)
+                    voice_act(message.content)
+                    source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio('test_00.wav'))
                     voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
     # TwitchIO command

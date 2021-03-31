@@ -62,7 +62,8 @@ available_languages = list(models.tts_models.keys())
 #     print(f'Available speakers for {lang}: {speakers}')
 
 def voice_act(text):
-    text = text[:140]
+    # text = text[:140]
+    # print(text)
     language = 'ru'
     # speaker = 'ruslan_16khz'
     speaker = random.choice([s for s in list(models.tts_models.get(language).keys()) if re.compile('^.*_16khz$').match(s)])
@@ -79,9 +80,8 @@ def voice_act(text):
 
     # torchaudio.set_audio_backend('sox_io')
     model = model.to(device)  # gpu or cpu
-    # texts = re.findall('.*?[\.\?\!]\s?', text)
     # print(texts)
-    audios = apply_tts(texts=[text],
+    audio = apply_tts(texts=text,
                     model=model,
                     sample_rate=sample_rate,
                     symbols=symbols,
@@ -93,11 +93,17 @@ def voice_act(text):
     # for audio in audios:
     #     wav.append(_make_wav(audio, rate = sample_rate))
     # return wav[-1:] + wav[:-1]
-    return _make_wav(audios[0], rate = sample_rate)
+    # return _make_wav(audio[0], rate = sample_rate)
+    for i, _audio in enumerate(audio):
+        torchaudio.save(f'test_{str(i).zfill(2)}.wav',
+                        _audio.unsqueeze(0),
+                        sample_rate=16000,
+                        bits_per_sample=16)
+    return '0'
 
 if __name__=='__main__':
-    i = 0
-    for wav in voice_act('Жили-были три китайца - Як, Як-Цидрак, Як-Цидрак-Цидрон-Цидрони, И еще три китаянки - Цыпа, Цыпа-Дрипа, Цыпа-Дрипа-Лампомпони. Поженились Як на Цыпе, Як-Цидрак на Цыпе-Дрипе, Як-Цидрак-Цидрон-Цидрони на Цыпе-Дрипе-Лампомпони. Вот у них родились дети: у Яка с Цыпой — Шах, у Як-Цидрака с Цыпой-Дрыпой — Шах-Шарах, у Як-Цидрак-Цидрони с Цыпо-Дрыпой-Лампопони — Шах-Шарах-Шарони.'):
-        i += 1
-        with open(f'output{i}.wav', 'wb') as fp:
-            fp.write(wav)
+    # wav = voice_act('Жили-были три китайца - Як, Як-Цидрак, Як-Цидрак-Цидрон-Цидрони, И еще три китаянки - Цыпа, Цыпа-Дрипа, Цыпа-Дрипа-Лампомпони. Поженились Як на Цыпе, Як-Цидрак на Цыпе-Дрипе, Як-Цидрак-Цидрон-Цидрони на Цыпе-Дрипе-Лампомпони. Вот у них родились дети: у Яка с Цыпой — Шах, у Як-Цидрака с Цыпой-Дрыпой — Шах-Шарах, у Як-Цидрак-Цидрони с Цыпо-Дрыпой-Лампопони — Шах-Шарах-Шарони.')
+    # wav = voice_act('Жили-были три китайца - Як, Як-Цидрак, Як-Цидрак-Цидрон-Цидрони, И еще три китаянки - Цыпа, Цыпа-Дрипа, Цыпа-Дрипа-Лампомпони.')
+    wav = voice_act('На отделанном вагонкой балконе его квартиры — целая экспозиция: российский триколор и флаг пограничных войск, над ними висят две фуражки — пограничная с советской кокардой и прокурорская, между ними — наградное холодное оружие, на многих клинках — дарственные надписи от руководителей разных ведомств, но по-настоящему теплые эмоции у Бакина вызывают только атрибуты пограничных войск: «Присягу-то я один раз давал, в армии». ')
+    with open(f'output.wav', 'wb') as fp:
+        fp.write(wav)
