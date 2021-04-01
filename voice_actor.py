@@ -5,13 +5,13 @@ import torch
 from omegaconf import OmegaConf
 import torchaudio
 
-""" Transform a numpy array to a PCM bytestring """
 import struct
 from io import BytesIO, FileIO
 import wave
 import numpy as np
 
 def _make_wav(data, rate):
+    """ Transform a numpy array to a PCM bytestring """
     try:
         data = np.array(data, dtype=float)
         if len(data.shape) == 1:
