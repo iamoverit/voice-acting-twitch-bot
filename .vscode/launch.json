@@ -8,7 +8,7 @@
             "name": "disocrd_bot.py",
             "type": "python",
             "request": "launch",
-            "program": "/mnt/c/PythonProjects/TTS/disocrd_bot.py",
+            "program": "/mnt/c/PythonProjects/TTS/discord_bot.py",
             "console": "integratedTerminal"
         }
     ]

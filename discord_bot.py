@@ -1,9 +1,11 @@
 import asyncio
+from twitchio.dataclasses import Message
 from os import pipe
 import shlex
 import subprocess
 
 import discord
+from discord.voice_client import VoiceClient
 from discord.errors import ClientException
 
 from discord.ext import commands
@@ -129,10 +131,23 @@ class Twitch(commands.Cog):
     async def read(self, ctx, *, query):
         """Read text to a voice channel"""
 
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(query))
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-
-        await ctx.send('Now playing: {}'.format(query))
+        await ctx.send('Now reading: {}'.format(query))
+        filename = uuid.uuid4().hex
+        count = voice_act(query, filename)
+        lock = asyncio.Lock()
+        def after(e):
+            lock.release()
+            print('Player error: %s' % e) if e else None
+        for i in range(0, count):
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'{filename}-{i}.wav'))
+            if ctx.voice_client is not None and ctx.voice_client.is_connected():
+                await lock.acquire()
+                ctx.voice_client.play(source, after=after)
+                await lock.acquire()
+                os.remove(f'{filename}-{i}.wav')
+                lock.release()
+            else: 
+                await ctx.send('Voice is not connected. Use !tjoin <channel> command.')
 
     @commands.command()
     async def join(self, ctx, *, channel: discord.VoiceChannel):
@@ -149,7 +164,7 @@ class Twitch(commands.Cog):
         if ctx.voice_client is None:
             if ctx.author.voice:
                 voice_client = await ctx.author.voice.channel.connect()
-                self._voice_clients.update({voice_client: channel})
+                self._voice_clients.update({ctx.author.guild: channel})
             else:
                 await ctx.send("You are not connected to a voice channel.")
                 raise commands.CommandError("Author not connected to a voice channel.")
@@ -163,7 +178,7 @@ class Twitch(commands.Cog):
     @commands.command()
     async def stop(self, ctx: commands.Context):
         """Stops and disconnects the bot from voice"""
-        self._voice_clients.update({ctx.voice_client: None})
+        self._voice_clients = dict((k, v) for (k, v) in self._voice_clients.items() if not (k == ctx.author.guild))
         await ctx.voice_client.disconnect()
 
     # Discord command
@@ -173,17 +188,30 @@ class Twitch(commands.Cog):
 
 
     # TwitchIO event
-    async def event_message(self, message):
+    async def event_message(self, message: Message):
         """Reads text to voice"""
         if(message.author.tags.get('msg-id')=='highlighted-message'):
-            for voice_client in self._voice_clients:
-                if self._voice_clients[voice_client] == message.channel.name:
+            for voice_client_guild, twitch_channel in self._voice_clients.items():
+                if twitch_channel == message.channel.name:
                     # audio = FFmpegPCMAudioBytesIO(voice_act(message.content))
                     # source = discord.PCMVolumeTransformer(audio)
                     filename = uuid.uuid4().hex
-                    voice_act(message.content, filename)
-                    source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'{filename}.wav'))
-                    voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else os.remove(f'{filename}.wav'))
+                    count = voice_act(message.content, filename)
+                    lock = asyncio.Lock()
+                    def after(e):
+                        lock.release()
+                        print('Player error: %s' % e) if e else None
+                    for i in range(0, count):
+                        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(f'{filename}-{i}.wav'))
+                        voice_client: VoiceClient = voice_client_guild.voice_client
+                        if voice_client is not None and voice_client.is_connected():
+                            await lock.acquire()
+                            voice_client.play(source, after=after)
+                            await lock.acquire()
+                            os.remove(f'{filename}-{i}.wav')
+                            lock.release()
+                        else: 
+                            await message.channel.send('Voice is not connected. Use !tjoin <channel> command on discord.')
 
     # TwitchIO command
     # async def twitch_command(self, ctx):
